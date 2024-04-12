@@ -52,7 +52,7 @@ export default function Login({ loginSetter, userSetter }) {
   return (
     <section className="flex flex-col gap-8 justify-center items-center min-h-screen w-screen bg-[#191625]">
       <h1 className="font-bold text-white font-serif text-2xl xl:text-4xl">
-        QR Gen 1.6
+        QR Gen 1.8
       </h1>
       <form
         className="flex flex-col border-4 p-5 min-w-[250px] w-4/5 max-w-[450px] h-[350px] rounded-lg gap-8" 

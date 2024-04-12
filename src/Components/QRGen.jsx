@@ -1,5 +1,6 @@
 import { createQR, createCode } from '../../createQrCode.js'
 import { useState } from 'react'
+import html2canvas from 'html2canvas'
 import Swal from 'sweetalert2'
 
 export default function QRGen({ username }) {
@@ -14,8 +15,9 @@ export default function QRGen({ username }) {
 
   const [createDate] = useState(formattedDate) // Fecha actual
   const [company, setCompany] = useState('')
-  const [clientNumber, setClientNumber] = useState(0)
-  const [billingNumber, setBillingNumber] = useState(0)
+  const [clientNumber, setClientNumber] = useState('')
+  const [billingNumber, setBillingNumber] = useState('')
+  const [observation, setObservation] = useState('')
 
   const handleGenerateQR = async () => {
     if (!company || !clientNumber || !billingNumber) {
@@ -57,11 +59,12 @@ export default function QRGen({ username }) {
           'Content-Type': 'application/json'
         },
       })
-      .then(response => {
+      .then(async response => {
         if (!response.ok) {
           throw new Error('Error al guardar el archivo HTML')
         }
         console.log('Archivo HTML guardado en el servidor correctamente.')
+        
         // Descargar la imagen del QR
         Swal.fire({
           icon: 'success',
@@ -69,12 +72,44 @@ export default function QRGen({ username }) {
           timer: 2000,
           timerProgressBar: true
         })
-        const qrLink = document.createElement('a')
-        qrLink.href = qrDataUrl.QR
-        qrLink.setAttribute('download', `${clientNumber}-${billingNumber}-${company}.png`)
-        document.body.appendChild(qrLink)
-        qrLink.click()
-        document.body.removeChild(qrLink)
+        // Generar la imagen del QR y el texto
+        const canvas = await html2canvas(document.body, { width: 700, height: 200 })
+        const ctx = canvas.getContext('2d')
+
+        // Limpiar el fondo
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+        // Agregar el QR
+        const qrImage = new Image()
+        qrImage.src = qrDataUrl.QR
+        await new Promise(resolve => qrImage.onload = resolve)
+        ctx.drawImage(qrImage, 0, 100, 100, 100)
+        
+        // Agregar el texto
+        ctx.font = '40px Arial'
+        ctx.fillStyle = 'black'
+        ctx.textAlign = 'center'
+
+        // Dividir el texto en líneas si es necesario
+        const lines = observation.split('/').map(line => line.trim());
+
+        // Dibujar las líneas de texto
+        const lineHeight = 35 // Altura de cada línea de texto
+        const textX = qrImage.width + 200 // Posición X inicial del texto
+        lines.forEach((line, index) => {
+          let textY = 50 + (index * lineHeight)
+          ctx.fillText(line, textX, textY)
+        })
+
+        // Convertir el lienzo en una imagen y descargarla
+        const imageUrl = canvas.toDataURL()
+        const link = document.createElement('a')
+        link.href = imageUrl
+        link.setAttribute('download', `${clientNumber}-${billingNumber}-${company}.png`)
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+
       })
       .catch(error => {
         console.error(error)
@@ -85,8 +120,10 @@ export default function QRGen({ username }) {
           timerProgressBar: true
         })
       })
-        
-    } catch (error) {
+      
+      setBillingNumber('')
+    } 
+    catch (error) {
       console.error('Error generando y descargando archivos:', error)
       Swal.fire({
         icon: 'error',
@@ -123,7 +160,7 @@ export default function QRGen({ username }) {
           <label className='font-semibold text-lg' htmlFor="clientNumber">
             Ingrese numero de cliente
           </label>
-          <input 
+          <input
             type="number"
             className="outline-none rounded-lg p-2 w-full text-lg max-sm:text-sm text-black" 
             min={0}
@@ -142,6 +179,17 @@ export default function QRGen({ username }) {
             min={0}
             onChange={(e) => setBillingNumber(e.target.value)}
             value={billingNumber}
+            required/>
+        </div>
+        <div className="flex flex-col gap-2 w-[280px]">
+          <label className='font-semibold text-lg' htmlFor="billingNumber">
+            Ingrese observacion
+          </label>
+          <input 
+            type="text"
+            className="outline-none rounded-lg p-2 w-full text-lg max-sm:text-sm text-black" 
+            onChange={(e) => setObservation(e.target.value)}
+            value={observation}
             required/>
         </div>
         <div className='w-full flex items-center justify-center'>
