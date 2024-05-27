@@ -18,7 +18,7 @@ export default function Login({ loginSetter, userSetter }) {
       return
     }
 
-    fetch('https://www.line-technology.com.ar/users')
+    fetch('https://line-technology.com.ar/users')
     .then(result => result.json())
     .then(data => {
       const users = data.users
