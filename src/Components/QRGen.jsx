@@ -51,7 +51,7 @@ export default function QRGen({ username }) {
       }
 
       // Hacer la solicitud POST al servidor
-      fetch('https://www.line-technology.com.ar/billingData', {
+      fetch('https://technologyline.com.ar/api/billingData', {
       // fetch('http://localhost:8080/billingData', {
         method: 'POST',
         body: JSON.stringify(formData),

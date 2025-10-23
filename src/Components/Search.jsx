@@ -40,7 +40,7 @@ export default function Search(){
       return
     }
 
-    fetch(`https://www.line-technology.com.ar/billingData?${search}=${inputSearch}`, {
+    fetch(`https://technologyline.com.ar/api/billingData?${search}=${inputSearch}`, {
     // fetch(`http://localhost:8080/billingData?${search}=${inputSearch}`, {
       method: 'GET',
       headers: {
